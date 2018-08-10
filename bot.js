@@ -510,7 +510,7 @@ const teamsList = function(message){
         return noError;
     }
 }
-
+//TODO this and downwards :)
 /**
  * Adds a team to teams
  * @param  {message} message the received message object
