@@ -74,21 +74,16 @@ function tournament(){
     this.tName;
 
     this.event = function(str){
-        if(str.length == 6) this.eventID = str;
-        else this.eventURL = str;
+        if(str.length == 6) {
+            this.eventID = str;
+            this.eventURL = EVENT_URL + this.eventID;
+        }
+        else {
+            this.eventURL = str;
+            this.eventID = this.eventURL.substr(this.eventURL.length - 6);
+        }
     }
-
-    this.create = function(){
-        if(this.bracketURL != null && (this.eventURL != null || this.eventID != null)){
-            if(this.eventURL == null){
-                this.eventURL = EVENT_URL + this.eventID;
-            }
-            else if(this.eventID  == null){
-                this.eventID = this.eventURL.substr(this.eventURL.length - 6);
-            }
-        }else throw "Couldn't create!\nBracket URL: " + this.bracketURL + "\nEvent URL: " + this.evenURL + "\nEventID: " + this.eventID;
-    }
-
+    
     this.setStatus = function(statusStr){
         if(PLACEMENTKEYS.contains(statusStr)) this.status = statusStr;
         else throw "Can't compute status: " + statusStr;
