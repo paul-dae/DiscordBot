@@ -304,7 +304,10 @@ var addTournament = function(message, args){
 
     this.compute = function(){
         if(this.check()){
-            //TODO
+            tour = new tournament();
+            tour.bracketURL = new battlefyURL(args[0]);
+            tour.event(args[1]);
+            s.addTournament(tour);
         }
     }
 
