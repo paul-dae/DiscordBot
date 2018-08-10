@@ -34,7 +34,7 @@ bot.on('ready', function (evt) {
     logger.info('Connected');
     logger.info('Logged in as: ');
     logger.info(bot.username + ' - (' + bot.id + ')');
-    teams.push("lolgg");
+    teams.push(new team("lolgg"));
 });
 bot.on('message', (message) => {
 
@@ -83,194 +83,6 @@ bot.on('message', (message) => {
     }
 });
 
-
-
-function oldmsg(user, userID, channelID, message, evt) {
-    // Our bot needs to know if it will execute a command
-   // It will listen for messages that will start with `!`
-
-   if(message === "abort") {
-       awaiting.done();
-       return;
-   }
-   if(awaiting == null || awaiting.userID != userID || awaiting.channelID != channelID || !awaiting.isActive){
-        if (message.substring(0, 1) == '!') {
-            var args = message.substring(1).split(" ");
-            var cmd = args.shift();
-
-            switch(cmd) {
-                case "s":
-                case "session":
-                    if(!(args[0] === "new") && s == null){
-                        bot.sendMessage({
-                            to: channelID,
-                            message: "Create a Session first please!"
-                        })
-                    }
-                    else{
-                        switch(args[0]){
-                            case "new":
-                                bot.sendMessage({
-                                    to: channelID,
-                                    message: "Creating new Session! Team: " + teams[0]
-                                })
-                                s = new session();
-                                s.team = new team(teams[0]);
-                            break;
-                            case "team":
-                                var teamsstr = "";
-                                teams.forEach(function(t){
-                                    teamsstr += ", " + t.toString();
-                                })
-                                teamsstr = teamsstr.substr(2);
-                                bot.sendMessage({
-                                    to: channelID,
-                                    message: "Assigning Team. Available Teams: " + teamsstr
-                                })
-                                if(args[1] != null){
-                                    assignTeam(args[1]);
-                                }
-                                else awaiting = new waitInput("sTeam", userID, channelID);
-                            break;
-                            case "tour":
-                            case "tourney":
-                                if(args.length == 3) {
-                                    tour = new tournament();
-                                    tour.bracketURL = new battlefyURL(args[1]);
-                                    tour.event(args[2]);
-                                    tour.create();
-                                    s.addTournament(tour);
-                                    post(channelID);
-                                    //awaiting.done()
-                                }
-                                else{
-                                    bot.sendMessage({
-                                        to: channelID,
-                                        message: "Invalid args size, usage:"
-                                    })
-                                }
-                            break;
-                            case "post":
-                                post(channelID);
-                            break;
-                        }
-                    }
-
-                break;
-                case "team":
-                    switch(args[0]){
-                        case "add":
-                            bot.sendMessage({
-                                to: channelID,
-                                message: "Adding new Team!\nName:"
-                            })
-                            teams.push(args[1]);
-                        break;
-                        case "ls":
-                            var teamsstr = "";
-                            teams.forEach(function(t){
-                                teamsstr += ", " + t.toString();
-                            })
-                            teamsstr = teamsstr.substr(2);
-                            bot.sendMessage({
-                                to: channelID,
-                                message: "Teams: " + teamsstr
-                            })
-                        break;
-                    }
-                break;
-                case "help":
-                    if(args == null){
-                        bot.sendMessage({
-                            to: channelID,
-                            message: "Commands:\n"
-                        })
-                    }
-                    // else{
-                    //     switch(args[0]){
-                    //         case
-                    //     }
-                    // }
-                break;
-                default:
-                    bot.sendMessage({
-                        to: channelID,
-                        message: "Did not recognize Argument." + ABORT
-                    })
-                    logger.log({
-                        level: 'error',
-                        message: "Invalid arg: " + message
-                    });
-                break;
-            }
-        }
-    }
-    else{
-        switch(awaiting.waitingCmd){
-            case "sTourBrURL":
-                if(message.split(" ").length > 1){
-                    bot.sendMessage({
-                        to: channelID,
-                        message: "Invalid Argument Length! Only post the url!" + ABORT
-                    })
-                    logger.log({
-                        level: 'error',
-                        message: "Invalid args"
-                    });
-                    awaiting.wrongInputs++;
-                }
-                else{
-                    //try{
-                    tour.bracketURL = new battlefyURL(message);
-                    // }catch(error){
-                    //     logger.log({
-                    //         level: 'error',
-                    //         message: error
-                    //     });
-                    // }                    logger.info(awaiting.awaitingCmd);
-                }
-                awaiting.waitingCmd = "sTourEvent";
-                bot.sendMessage({
-                    to: channelID,
-                    message: "Event URL:"
-                })
-            break;
-            case "sTourEvent":
-                if(message.split(" ").length > 1){
-                    bot.sendMessage({
-                        to: channelID,
-                        message: "Invalid Argument Length! Only post the url!" + ABORT
-                    })
-                    logger.log({
-                        level: 'error',
-                        message: "Invalid args"
-                    });
-                    awaiting.wrongInputs++;
-                }
-                else{
-                    try{
-                        if(message.length == 6)tour.eventID = message;
-                        else tour.eventURL = message;
-                        s.addTournament(tour);
-                        post(channelID);
-                        //tour.create();
-                        awaiting.done();
-
-                    }catch(error){
-                        logger.log({
-                            level: 'error',
-                            message: error
-                        });
-                    }
-                }
-            break
-            case "sTeam":
-                assignTeam(message);
-            break;
-        }
-    }
-}
-
 /**
  * Creates a new session() with the team teams[0]
  * @param  {message} message the received message object
@@ -282,7 +94,7 @@ const createSession = function(message){
 
     this.compute = function(){
         if(this.check()){
-            s = new session(team(teams[0]));
+            s = new session(teams[0]);
         }
     }
 
@@ -370,7 +182,7 @@ const assignTeam = function(message, args){
                 getError("nosession", message, "session", []);
                 noError = false;
             }
-            if(!teams.includes(this.teamname)){
+            if(knownTeam(this.teamname)){
                 getError("unknownteam", message, "team", [args])
                 noError = false;
             }
@@ -487,7 +299,7 @@ const teamsList = function(message){
         if(this.check()){
             var teamsStr = "";
             teams.forEach((t) => {
-                teamsStr.push(t.toString());
+                teamsStr.push(t.name);
             })
             this.message.channel.send(teamsStr);
         }
@@ -510,7 +322,7 @@ const teamsList = function(message){
         return noError;
     }
 }
-//TODO this and downwards :)
+
 /**
  * Adds a team to teams
  * @param  {message} message the received message object
@@ -524,7 +336,7 @@ const teamsAdd = function(message, args){
 
     this.compute = function(){
         if(this.check()){
-            //TODO
+            teams.push(new Team(this.teamName));
         }
     }
 
@@ -536,10 +348,10 @@ const teamsAdd = function(message, args){
         }
         else{
             this.teamName = args.shift();
-        }
-        if(teams.includes(arg)){
-            getError("knownteam", message, "teams ls", [args])
-            noError = false;
+            if(knownTeam(this.teamName)){
+                getError("knownteam", message, "teams ls", [args])
+                noError = false;
+            }
         }
         return noError;
     }
@@ -557,7 +369,9 @@ const help = function(message, args){
 
     this.compute = function(){
         if(this.check()){
-            //TODO
+            if(this.args == null || this.args.length === 0){
+                message.channel.send(SESSIONHELP + "\n" + TEAMHELP);
+            }
         }
     }
 
@@ -625,6 +439,13 @@ function getStringArray(objArr){
     return strArr;
 }
 
+
+function knownTeam(teamName){
+    teams.forEach((t) => {
+        if(t.name.includes(teamName)) return true;
+    })
+    return false;
+}
 
 
 
