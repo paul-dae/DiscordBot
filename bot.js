@@ -39,12 +39,12 @@ bot.on('message', async message => {
     const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
     var command2;
-    logger.info("args " + args+ " command " + command);
 
     switch(command){
         case "s":
         case "session":
             command2 = args.shift().toLowerCase();
+            logger.info(command2);
             switch(command2){
                 case "new":
                     createSession(message);
@@ -95,16 +95,13 @@ const createSession = function(message){
     this.noError = true;
 
     if(!(this.args.length === this.requiredArgLength)){
-        getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
-        this.noError = false;
-    }
-    if(s == null){
-        getError("nosession", message, "session", []);
+        getError("arglength", this.message, "session", [this.requiredArgLength, this.args.length]);
         this.noError = false;
     }
 
     if(this.noError){
         s = new session(teams[0]);
+        getInfo("newsession", this.message, [s.team.name]);
     }
 }
 
@@ -122,7 +119,7 @@ const addTournament = function(message, args){
     this.noError = true;
 
     if(!(this.args.length === this.requiredArgLength)){
-        getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
+        getError("arglength", this.message, "session", [this.requiredArgLength, this.args.length]);
         this.noError = false;
     }
     else{
@@ -130,17 +127,17 @@ const addTournament = function(message, args){
         this.eventStr = this.args.shift();
     }
     if(s == null){
-        getError("nosession", message, "session", []);
+        getError("nosession", this.message, "session", []);
         this.noError = false;
     }
 
-    tour = new tournament();
-    tour.bracketURL = new battlefyURL(this.bracketURL);
-    tour.event(this.eventStr);
-    s.addTournament(tour);
-
-
-
+    if(this.noError)
+        tour = new tournament();
+        tour.bracketURL = new battlefyURL(this.bracketURL);
+        tour.event(this.eventStr);
+        s.addTournament(tour);
+        getInfo("sTour", this.message, [tour.bracketURL.toString(), tour.eventURL]);
+    }
 }
 
 /**
@@ -157,23 +154,24 @@ const assignTeam = function(message, args){
     this.noError = true;
 
     if(!(this.args.length === this.requiredArgLength)){
-        getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
+        getError("arglength", this.message, "session", [this.requiredArgLength, this.args.length]);
         this.noError = false;
     }
     else{
         this.teamName = args.shift();
         if(s == null){
-            getError("nosession", message, "session", []);
+            getError("nosession", this.message, "session", []);
             this.noError = false;
         }
         if(knownTeam(this.teamname)){
-            getError("unknownteam", message, "team", [args])
+            getError("unknownteam", this.message, "team", [args])
             this.noError = false;
         }
     }
 
     if(this.noError){
         s.team = new team(this.teamName);
+        getInfo("sTeam", this.message, [this.teamName]);
     }
 }
 
@@ -192,7 +190,7 @@ const editTournament = function(message, args){
     this.noError = true;
 
     if(!(this.args.length === this.requiredArgLength)){
-        getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
+        getError("arglength", this.message, "session", [this.requiredArgLength, this.args.length]);
         this.noError = false;
     }
     else{
@@ -201,34 +199,35 @@ const editTournament = function(message, args){
         this.value = this.args.shift();
 
         if(s.tournaments.length < this.teamIndex){
-            getError("indexOutOfRange", message, "session post", [args])
+            getError("indexOutOfRange", this.message, "session post", [args])
             this.noError = false;
         }
     }
     if(s == null){
-        getError("nosession", message, "session", []);
+        getError("nosession", this.message, "session", []);
         this.noError = false;
     }
     else if(s.tournaments == null){
-        getError("notours", message, "session", [args])
+        getError("notours", this.message, "session", [args])
         this.noError = false;
     }
 
     if(this.noError){
         switch(cmd){
             case "bracket":
-                s.tournaments[teamIndex].bracketURL = new battlefyURL(this.value);
+                s.tournaments[this.teamIndex].bracketURL = new battlefyURL(this.value);
             break;
             case "event":
-                s.tournaments[teamIndex].event(this.value);
+                s.tournaments[this.teamIndex].event(this.value);
             break;
             case "status":
-                s.tournaments[teamIndex].setStatus(this.value);
+                s.tournaments[this.teamIndex].setStatus(this.value);
             break;
             default:
-                getError("editcmd", message, "session edit", [this.cmd])
+                getError("editcmd", this.message, "session edit", [this.cmd])
             break;
         }
+        getInfo("sEdit", this.message, [this.teamIndex, s.tournaments[this.teamIndex].bracketURL.toString(), s.tournaments[this.teamIndex].eventURL]);
     }
 }
 
@@ -244,20 +243,21 @@ const post = function(message){
     this.noError = true;
 
     if(!(this.args.length === this.requiredArgLength)){
-        getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
+        getError("arglength", this.message, "session", [this.requiredArgLength, this.args.length]);
         this.noError = false;
     }
     if(s == null){
-        getError("nosession", message, "session", []);
+        getError("nosession", this.message, "session", []);
         this.noError = false;
     }
     else if(s.tournaments == null || s.tournaments == 0){
-        getError("notours", message, "session", [args])
+        getError("notours", this.message, "session", [args])
         this.noError = false;
     }
 
     if(this.noError){
         this.message.send(s.toString());
+        logger.info("Posting session");
     }
 }
 
@@ -272,24 +272,26 @@ const teamsList = function(message){
     this.noError = true;
 
     if(!(this.args.length === this.requiredArgLength)){
-        getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
+        getError("arglength", this.message, "session", [this.requiredArgLength, this.args.length]);
         this.noError = false;
     }
     if(s == null){
-        getError("nosession", message, "session", []);
+        getError("nosession", this.message, "session", []);
         this.noError = false;
     }
     if(s.tournaments == null || s.tournaments == 0){
-        getError("notours", message, "session", [args])
+        getError("notours", this.message, "session", [args])
         this.noError = false;
     }
 
     if(this.noError){
         var teamsStr = "";
         teams.forEach((t) => {
-            teamsStr.push(t.name);
+            teamsStr.push(", " + t.name);
         })
+        teamStr = teamStr.substring(2);
         this.message.channel.send(teamsStr);
+        logger.info("Posting teams: " + teamsStr);
     }
 }
 
@@ -306,19 +308,20 @@ const teamsAdd = function(message, args){
     this.noError = true;
 
     if(!(this.args.length === this.requiredArgLength)){
-        getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
+        getError("arglength", this.message, "session", [this.requiredArgLength, this.args.length]);
         this.noError = false;
     }
     else{
         this.teamName = args.shift();
         if(knownTeam(this.teamName)){
-            getError("knownteam", message, "teams ls", [args])
+            getError("knownteam", this.message, "teams ls", [args])
             this.noError = false;
         }
     }
 
     if(this.noError){
         teams.push(new Team(this.teamName));
+        getInfo("tAdd", this.message, [this.teamName]);
     }
 }
 
@@ -336,6 +339,7 @@ const help = function(message, args){
     if(this.args != null && this.args.length > 0) this.hasArgs = true;
 
     if(this.noError){
+        logger.info("Posting help");
         if(this.args == null || this.args.length === 0){
             message.channel.send(SESSIONHELP + "\n" + TEAMHELP);
         }
@@ -388,6 +392,35 @@ function getError(type, message, command, args){
         level: "error",
         message: logmsg
     })
+    this.message.channel.send(botmsg);
+}
+
+function getInfo(type, message, args){
+    var logmsg = "Unidentified error: " + type;
+    var botmsg = "oof";
+    switch(type){
+        case "newsession":
+            logmsg = "Created new Session, team: " + args[0];
+            botmsg = "Created new Session. Team: " + args[0];
+        break;
+        case "sTeam":
+            logmsg = "Assigned team " +  args[0] + " to session";
+            botmsg = "Assigned team " +  args[0] + " to session.";
+        break;
+        case "sTour":
+            logmsg = "Created new tournament, bURL: " + args[0] + "\neURL: " + args[1];
+            botmsg = "Created new tournament.";
+        break;
+        case "sEdit":
+            logmsg = "Edited tournament, index: " + args[0] + "\nbURL: " + args[1] + "\neURL: " + args[2];
+            botmsg = "Tournament edited.";
+        break;
+        case "tAdd":
+            logmsg = "Added new team: " + args[0];
+            botmsg = "Added new team: " + args[0];
+        break;
+    }
+    logger.info(logmsg);
     this.message.channel.send(botmsg);
 }
 
