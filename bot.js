@@ -404,6 +404,9 @@ const editTournament = function(message, args){
                 case "status":
                     s.tournaments[teamIndex].setStatus(this.value);
                 break;
+                default:
+                    getError("editcmd", message, "session edit", [this.cmd])
+                break;
             }
         }
     }
@@ -418,17 +421,53 @@ const editTournament = function(message, args){
             this.teamIndex = parseInt(this.args.shift().toLowerCase()) - 1;
             this.cmd = this.args.shift().toLowerCase();
             this.value = this.args.shift();
+
+            if(s.tournaments.length < this.teamIndex){
+                getError("indexOutOfRange", message, "session post", [args])
+                noError = false;
+            }
         }
         if(s == null){
             getError("nosession", message, "session", []);
             noError = false;
         }
-        if(s.tournaments == null){
+        else if(s.tournaments == null){
             getError("notours", message, "session", [args])
             noError = false;
         }
-        if(s.tournaments.length < this.teamIndex){
-            getError("indexOutOfRange", message, "session post", [args])
+
+        return noError;
+    }
+}
+
+
+/**
+ * Posts the Session
+ * @param  {message} message the received message object
+ */
+const post = function(message){
+    this.requiredArgLength = 0;
+    this.args = new Array(0);
+    this.message = message;
+
+    this.compute = function(){
+        if(this.check()){
+            this.message.send(s.toString());
+        }
+    }
+
+    this.check = function(){
+        var noError = true;
+        if(!(this.args.length === this.requiredArgLength)){
+            getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
+            noError = false;
+        }
+        if(s == null){
+            getError("nosession", message, "session", []);
+            noError = false;
+        }
+        else if(s.tournaments == null || s.tournaments == 0){
+            getError("notours", message, "session", [args])
             noError = false;
         }
         return noError;
@@ -446,7 +485,11 @@ const teamsList = function(message){
 
     this.compute = function(){
         if(this.check()){
-            //TODO
+            var teamsStr = "";
+            teams.forEach((t) => {
+                teamsStr.push(t.toString());
+            })
+            this.message.channel.send(teamsStr);
         }
     }
 
@@ -530,7 +573,7 @@ const help = function(message, args){
  * @param  {string} type    errortype
  * @param  {message} message the received message object
  * @param  {string} command helpcommand
- * @param  {string} args    arguments, that are relevant to the error;
+ * @param  {[string]} args    arguments, that are relevant to the error;
  */
 function getError(type, message, command, args){
     var logmsg = "Unidentified error: " + type;
@@ -560,14 +603,27 @@ function getError(type, message, command, args){
             logmsg = "IndexOutOfRange: " + args[0] + " , max: " + args[1];
             botmsg = "Please add tournaments to the session first Try !help " + command;
         break;
+        case "editcmd":
+            logmsg = "Unknown edit command: " + args[0];
+            botmsg = "Unknown edit command : *" + args[0] + "*.  Try !help " + command;
+        break;
+        default:
+        break;
     }
     logger.log({
         level: "error";
         message: logmsg
     })
-    message.channel.send(botmsg);
+    this.message.channel.send(botmsg);
 }
 
+function getStringArray(objArr){
+    var strArr = [];
+    objArr.forEach((o) => {
+        strArr.push(o.toString());
+    })
+    return strArr;
+}
 
 
 
@@ -579,15 +635,6 @@ function getError(type, message, command, args){
 
 
 //IDEA
-function post(channelID){
-    if(s.tournaments.length > 0){
-        bot.sendMessage({
-            to: channelID,
-            message: s.toString()
-        })
-    }
-}
-
 function transmission(userID, channelID){
     this.userID = userID;
     this.channelID = channelID;
