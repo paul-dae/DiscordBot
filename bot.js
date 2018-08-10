@@ -44,7 +44,6 @@ bot.on('message', async message => {
         case "s":
         case "session":
             command2 = args.shift().toLowerCase();
-            logger.info(command2);
             switch(command2){
                 case "new":
                     createSession(message);
@@ -59,6 +58,9 @@ bot.on('message', async message => {
                 break;
                 case "edit":
                     editTournament(message, args);
+                break;
+                case "post":
+                    post(message);
                 break;
             }
         break;
@@ -131,7 +133,7 @@ const addTournament = function(message, args){
         this.noError = false;
     }
 
-    if(this.noError)
+    if(this.noError){
         tour = new tournament();
         tour.bracketURL = new battlefyURL(this.bracketURL);
         tour.event(this.eventStr);
@@ -256,7 +258,7 @@ const post = function(message){
     }
 
     if(this.noError){
-        this.message.send(s.toString());
+        this.message.channel.send(s.toString());
         logger.info("Posting session");
     }
 }
