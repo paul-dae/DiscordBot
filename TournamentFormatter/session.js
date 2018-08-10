@@ -52,7 +52,7 @@ function session(team){
         this.tournaments.forEach(function(t){
             out += t.toString()
         })
-        out += TEAMNAME + this.team.toString() + "\n" + FRAME + "\n" + toBold("Notes: " + this.notes);
+        out += TEAMNAME + this.team.name + "\n" + FRAME + "\n" + toBold("Notes: " + this.notes);
         return out;
     }
 }
@@ -83,7 +83,7 @@ function tournament(){
             this.eventID = this.eventURL.substr(this.eventURL.length - 6);
         }
     }
-    
+
     this.setStatus = function(statusStr){
         if(PLACEMENTKEYS.contains(statusStr)) this.status = statusStr;
         else throw "Can't compute status: " + statusStr;
