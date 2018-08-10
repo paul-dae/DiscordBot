@@ -271,7 +271,11 @@ function oldmsg(user, userID, channelID, message, evt) {
     }
 }
 
-var createSession = function(message){
+/**
+ * Creates a new session() with the team teams[0]
+ * @param  {message} message the received message object
+ */
+const createSession = function(message){
     this.requiredArgLength = 0;
     this.args = new Array(0);
     this.message = message;
@@ -297,16 +301,23 @@ var createSession = function(message){
     }
 }
 
-var addTournament = function(message, args){
+/**
+ * Adds a tournament to the session with the given bracket and event URLs.
+ * @param  {message} message the received message object
+ * @param  {[string, string]} args  [0]: bracketURL, [1]: event Url or ID
+ */
+const addTournament = function(message, args){
     this.requiredArgLength = 2;
     this.message = message;
     this.args = args;
+    this.bracketURL;
+    this.eventStr;
 
     this.compute = function(){
         if(this.check()){
             tour = new tournament();
-            tour.bracketURL = new battlefyURL(args[0]);
-            tour.event(args[1]);
+            tour.bracketURL = new battlefyURL(this.bracketURL);
+            tour.event(this.eventStr);
             s.addTournament(tour);
         }
     }
@@ -317,23 +328,33 @@ var addTournament = function(message, args){
             getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
             noError = false;
         }
+        else{
+            this.bracketURL = this.args.shift();
+            this.eventStr = this.args.shift();
+        }
         if(s == null){
             getError("nosession", message, "session", []);
             noError = false;
         }
-
         return noError;
     }
 }
 
-var assignTeam = function(message, args){
+/**
+ * Assigns the team with the passed teamname to the current session, if a
+ * team with that name exists in teams.
+ * @param  {message} message the received message object
+ * @param  {[string]} args    [0]: teamName
+ */
+const assignTeam = function(message, args){
     this.reuiredArgLength = 1;
     this.message = message;
     this.args = args;
+    this.teamName;
 
     this.compute = function(){
         if(this.check()){
-            s.team = new team(args[0]);
+            s.team = new team(this.teamName);
         }
     }
 
@@ -343,26 +364,47 @@ var assignTeam = function(message, args){
             getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
             noError = false;
         }
-        if(s == null){
-            getError("nosession", message, "session", []);
-            noError = false;
-        }
-        if(!teams.includes(arg)){
-            getError("unknownteam", message, "team", [args])
-            noError = false;
+        else{
+            this.teamName = args.shift();
+            if(s == null){
+                getError("nosession", message, "session", []);
+                noError = false;
+            }
+            if(!teams.includes(this.teamname)){
+                getError("unknownteam", message, "team", [args])
+                noError = false;
+            }
         }
         return noError;
     }
 }
 
-var editTournament = function(message, args){
+/**
+ * Edit tournament with given indexOf
+ * @param  {message} message the received message object
+ * @param  {[int, string, string]} args    [0]: teamIndex, [1]:Field to edit, [2]: new Value
+ */
+const editTournament = function(message, args){
     this.requiredArgLength = 3;
     this.message = message;
     this.args = args;
+    this.teamIndex;
+    this.cmd;
+    this.value;
 
     this.compute = function(){
         if(this.check()){
-            //TODO
+            switch(cmd){
+                case "bracket":
+                    s.tournaments[teamIndex].bracketURL = new battlefyURL(this.value);
+                break;
+                case "event":
+                    s.tournaments[teamIndex].event(this.value);
+                break;
+                case "status":
+                    s.tournaments[teamIndex].setStatus(this.value);
+                break;
+            }
         }
     }
 
@@ -372,19 +414,32 @@ var editTournament = function(message, args){
             getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
             noError = false;
         }
+        else{
+            this.teamIndex = parseInt(this.args.shift().toLowerCase()) - 1;
+            this.cmd = this.args.shift().toLowerCase();
+            this.value = this.args.shift();
+        }
         if(s == null){
             getError("nosession", message, "session", []);
             noError = false;
         }
-        if(s.tournaments == null || s.tournaments == 0){
+        if(s.tournaments == null){
             getError("notours", message, "session", [args])
+            noError = false;
+        }
+        if(s.tournaments.length < this.teamIndex){
+            getError("indexOutOfRange", message, "session post", [args])
             noError = false;
         }
         return noError;
     }
 }
 
-var teamsList = function(message){
+/**
+ * Lists all available teams
+ * @param  {message} message the received message object
+ */
+const teamsList = function(message){
     this.requiredArgLength = 0;
     this.args = new Array(0);
     this.message = message;
@@ -413,10 +468,16 @@ var teamsList = function(message){
     }
 }
 
-var teamsAdd = function(){
+/**
+ * Adds a team to teams
+ * @param  {message} message the received message object
+ * @param  {[string]} args  [0]: teamName
+ */
+const teamsAdd = function(message, args){
     this.requiredArgLength = 1;
     this.message = message;
     this.args = args;
+    this.teamName;
 
     this.compute = function(){
         if(this.check()){
@@ -430,6 +491,9 @@ var teamsAdd = function(){
             getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
             noError = false;
         }
+        else{
+            this.teamName = args.shift();
+        }
         if(teams.includes(arg)){
             getError("knownteam", message, "teams ls", [args])
             noError = false;
@@ -438,9 +502,15 @@ var teamsAdd = function(){
     }
 }
 
-var help = function(message, args){
+/**
+ * Replies a help message [to the given command]
+ * @param  {message} message the received message object
+ * @param  {[string]} args  The Command(s)
+ */
+const help = function(message, args){
     this.message = message;
     this.args = args;
+    this.hasArgs = false;
 
     this.compute = function(){
         if(this.check()){
@@ -450,14 +520,18 @@ var help = function(message, args){
 
     this.check = function(){
         var noError = true;
-        if(teams.includes(arg)){
-            getError("knownteam", message, "teams ls", [args])
-            noError = false;
-        }
+        if(this.args != null && this.args.length > 0) this.hasArgs = true;
         return noError;
     }
 }
 
+/**
+ * Logs an Error and gives the user feedback as well.
+ * @param  {string} type    errortype
+ * @param  {message} message the received message object
+ * @param  {string} command helpcommand
+ * @param  {string} args    arguments, that are relevant to the error;
+ */
 function getError(type, message, command, args){
     var logmsg = "Unidentified error: " + type;
     var botmsg = "oof";
@@ -468,7 +542,7 @@ function getError(type, message, command, args){
         break;
         case "unknownteam":
             logmsg = "Unknown Team: " + args[0] + "\nKnown Teams: " + teams;
-            botmsg = "Unknown Team. Try !help " + command;
+            botmsg = "Unknown Team. Note: Teamname is case sensitive! Try !help " + command;
         break;
         case "nosession":
             logmsg = "No Session created yet.";
@@ -476,6 +550,14 @@ function getError(type, message, command, args){
         break;
         case "notours":
             logmsg = "No tournaments found in session to edit.";
+            botmsg = "Please add tournaments to the session first! Try !help " + command;
+        break;
+        case "knownteam":
+            logmsg = "No tournaments found in session to edit.";
+            botmsg = "This team has already been added! Try !help " + command;
+        break;
+        case "indexOutOfRange":
+            logmsg = "IndexOutOfRange: " + args[0] + " , max: " + args[1];
             botmsg = "Please add tournaments to the session first Try !help " + command;
         break;
     }
