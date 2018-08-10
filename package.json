@@ -1,11 +1,26 @@
 {
-    "name": "TournamentFormatter-bot",
-    "version": "1.0.0",
-    "description": "Generates nice Text from a Battlefy Tournament page and an event Link :) .",
-    "main": "TournamentFormatterBot.js",
-    "author": "Worldcreator",
-    "dependencies": {
-        "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
-        "winston": "^3.0.0"
-    }
+  "name": "TournamentFormatter-bot",
+  "version": "1.0.0",
+  "description": "Generates nice Text from a Battlefy Tournament page and an event Link :) .",
+  "main": "TournamentFormatterBot.js",
+  "author": "Worldcreator",
+  "dependencies": {
+    "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+    "discord.js": "^11.4.0",
+    "winston": "^3.0.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/paul-dae/DiscordBot.git"
+  },
+  "keywords": [],
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/paul-dae/DiscordBot/issues"
+  },
+  "homepage": "https://github.com/paul-dae/DiscordBot#readme"
 }

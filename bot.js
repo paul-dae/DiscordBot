@@ -1,4 +1,4 @@
-var Discord = require('discord.io');
+var Discord = require('discord.js');
 var logger = require('winston');
 var auth = require('./auth.json');
 var session = require("./TournamentFormatter/session.js").session;
@@ -26,62 +26,63 @@ logger.add(new logger.transports.Console, {
 });
 logger.level = 'debug';
 // Initialize Discord Bot
-var bot = new Discord.Client({
-   token: auth.token,
-   autorun: true
-});
+var bot = new Discord.Client();
+
 bot.on('ready', function (evt) {
     logger.info('Connected');
     logger.info('Logged in as: ');
     logger.info(bot.username + ' - (' + bot.id + ')');
     teams.push(new team("lolgg"));
 });
-bot.on('message', (message) => {
-
-    if(message.author.bot || !message.author.hasRole(BOTCOMMANDER) || message.content.indexOf(config.prefix) !== 0) return;
+bot.on('message', async message => {
+    if(message.author.bot || !message.member.roles.find(role => role.name === BOTCOMMANDER) || message.content.indexOf(config.prefix) === 0) return;
     const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
+    var command2;
+    logger.info("args " + args+ " command " + command);
 
     switch(command){
         case "s":
         case "session":
-            const command2 = args.shift().toLowerCase();
+            command2 = args.shift().toLowerCase();
             switch(command2){
                 case "new":
-                    createSession(message).compute();
+                    createSession(message);
                 break
                 case "tour":
                 case "tourney":
                 case "tournament":
-                    addTournament(message, args).compute();
+                    addTournament(message, args);
                 break;
                 case "team":
-                    assignTeam(message, args).compute();
+                    assignTeam(message, args);
                 break;
                 case "edit":
-                    editTournament(message, args).compute();
+                    editTournament(message, args);
                 break;
             }
         break;
         case "t":
         case "teams":
-            const command2 = args.shift().toLowerCase();
+            command2 = args.shift().toLowerCase();
             switch(command2){
                 case "ls":
                 case "list":
-                    teamsList(message).compute();
+                    teamsList(message);
                 break;
                 case "add":
-                    teamsAdd(message, args).compute();
+                    teamsAdd(message, args);
                 break;
             }
         break;
         case "h":
         case "help":
-            help(message, args).compute();
+            help(message, args);
         break;
     }
 });
+
+bot.login(auth.token);
 
 /**
  * Creates a new session() with the team teams[0]
@@ -91,25 +92,19 @@ const createSession = function(message){
     this.requiredArgLength = 0;
     this.args = new Array(0);
     this.message = message;
+    this.noError = true;
 
-    this.compute = function(){
-        if(this.check()){
-            s = new session(teams[0]);
-        }
+    if(!(this.args.length === this.requiredArgLength)){
+        getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
+        this.noError = false;
+    }
+    if(s == null){
+        getError("nosession", message, "session", []);
+        this.noError = false;
     }
 
-    this.check = function(){
-        var noError = true;
-        if(!(this.args.length === this.requiredArgLength)){
-            getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
-            noError = false;
-        }
-        if(s == null){
-            getError("nosession", message, "session", []);
-            noError = false;
-        }
-
-        return noError;
+    if(this.noError){
+        s = new session(teams[0]);
     }
 }
 
@@ -124,32 +119,28 @@ const addTournament = function(message, args){
     this.args = args;
     this.bracketURL;
     this.eventStr;
+    this.noError = true;
 
-    this.compute = function(){
-        if(this.check()){
-            tour = new tournament();
-            tour.bracketURL = new battlefyURL(this.bracketURL);
-            tour.event(this.eventStr);
-            s.addTournament(tour);
-        }
+    if(!(this.args.length === this.requiredArgLength)){
+        getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
+        this.noError = false;
+    }
+    else{
+        this.bracketURL = this.args.shift();
+        this.eventStr = this.args.shift();
+    }
+    if(s == null){
+        getError("nosession", message, "session", []);
+        this.noError = false;
     }
 
-    this.check = function(){
-        var noError = true;
-        if(!(this.args.length === this.requiredArgLength)){
-            getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
-            noError = false;
-        }
-        else{
-            this.bracketURL = this.args.shift();
-            this.eventStr = this.args.shift();
-        }
-        if(s == null){
-            getError("nosession", message, "session", []);
-            noError = false;
-        }
-        return noError;
-    }
+    tour = new tournament();
+    tour.bracketURL = new battlefyURL(this.bracketURL);
+    tour.event(this.eventStr);
+    s.addTournament(tour);
+
+
+
 }
 
 /**
@@ -163,31 +154,26 @@ const assignTeam = function(message, args){
     this.message = message;
     this.args = args;
     this.teamName;
+    this.noError = true;
 
-    this.compute = function(){
-        if(this.check()){
-            s.team = new team(this.teamName);
+    if(!(this.args.length === this.requiredArgLength)){
+        getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
+        this.noError = false;
+    }
+    else{
+        this.teamName = args.shift();
+        if(s == null){
+            getError("nosession", message, "session", []);
+            this.noError = false;
+        }
+        if(knownTeam(this.teamname)){
+            getError("unknownteam", message, "team", [args])
+            this.noError = false;
         }
     }
 
-    this.check = function(){
-        var noError = true;
-        if(!(this.args.length === this.requiredArgLength)){
-            getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
-            noError = false;
-        }
-        else{
-            this.teamName = args.shift();
-            if(s == null){
-                getError("nosession", message, "session", []);
-                noError = false;
-            }
-            if(knownTeam(this.teamname)){
-                getError("unknownteam", message, "team", [args])
-                noError = false;
-            }
-        }
-        return noError;
+    if(this.noError){
+        s.team = new team(this.teamName);
     }
 }
 
@@ -203,52 +189,46 @@ const editTournament = function(message, args){
     this.teamIndex;
     this.cmd;
     this.value;
+    this.noError = true;
 
-    this.compute = function(){
-        if(this.check()){
-            switch(cmd){
-                case "bracket":
-                    s.tournaments[teamIndex].bracketURL = new battlefyURL(this.value);
-                break;
-                case "event":
-                    s.tournaments[teamIndex].event(this.value);
-                break;
-                case "status":
-                    s.tournaments[teamIndex].setStatus(this.value);
-                break;
-                default:
-                    getError("editcmd", message, "session edit", [this.cmd])
-                break;
-            }
+    if(!(this.args.length === this.requiredArgLength)){
+        getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
+        this.noError = false;
+    }
+    else{
+        this.teamIndex = parseInt(this.args.shift().toLowerCase()) - 1;
+        this.cmd = this.args.shift().toLowerCase();
+        this.value = this.args.shift();
+
+        if(s.tournaments.length < this.teamIndex){
+            getError("indexOutOfRange", message, "session post", [args])
+            this.noError = false;
         }
     }
+    if(s == null){
+        getError("nosession", message, "session", []);
+        this.noError = false;
+    }
+    else if(s.tournaments == null){
+        getError("notours", message, "session", [args])
+        this.noError = false;
+    }
 
-    this.check = function(){
-        var noError = true;
-        if(!(this.args.length === this.requiredArgLength)){
-            getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
-            noError = false;
+    if(this.noError){
+        switch(cmd){
+            case "bracket":
+                s.tournaments[teamIndex].bracketURL = new battlefyURL(this.value);
+            break;
+            case "event":
+                s.tournaments[teamIndex].event(this.value);
+            break;
+            case "status":
+                s.tournaments[teamIndex].setStatus(this.value);
+            break;
+            default:
+                getError("editcmd", message, "session edit", [this.cmd])
+            break;
         }
-        else{
-            this.teamIndex = parseInt(this.args.shift().toLowerCase()) - 1;
-            this.cmd = this.args.shift().toLowerCase();
-            this.value = this.args.shift();
-
-            if(s.tournaments.length < this.teamIndex){
-                getError("indexOutOfRange", message, "session post", [args])
-                noError = false;
-            }
-        }
-        if(s == null){
-            getError("nosession", message, "session", []);
-            noError = false;
-        }
-        else if(s.tournaments == null){
-            getError("notours", message, "session", [args])
-            noError = false;
-        }
-
-        return noError;
     }
 }
 
@@ -261,28 +241,23 @@ const post = function(message){
     this.requiredArgLength = 0;
     this.args = new Array(0);
     this.message = message;
+    this.noError = true;
 
-    this.compute = function(){
-        if(this.check()){
-            this.message.send(s.toString());
-        }
+    if(!(this.args.length === this.requiredArgLength)){
+        getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
+        this.noError = false;
+    }
+    if(s == null){
+        getError("nosession", message, "session", []);
+        this.noError = false;
+    }
+    else if(s.tournaments == null || s.tournaments == 0){
+        getError("notours", message, "session", [args])
+        this.noError = false;
     }
 
-    this.check = function(){
-        var noError = true;
-        if(!(this.args.length === this.requiredArgLength)){
-            getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
-            noError = false;
-        }
-        if(s == null){
-            getError("nosession", message, "session", []);
-            noError = false;
-        }
-        else if(s.tournaments == null || s.tournaments == 0){
-            getError("notours", message, "session", [args])
-            noError = false;
-        }
-        return noError;
+    if(this.noError){
+        this.message.send(s.toString());
     }
 }
 
@@ -294,32 +269,27 @@ const teamsList = function(message){
     this.requiredArgLength = 0;
     this.args = new Array(0);
     this.message = message;
+    this.noError = true;
 
-    this.compute = function(){
-        if(this.check()){
-            var teamsStr = "";
-            teams.forEach((t) => {
-                teamsStr.push(t.name);
-            })
-            this.message.channel.send(teamsStr);
-        }
+    if(!(this.args.length === this.requiredArgLength)){
+        getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
+        this.noError = false;
+    }
+    if(s == null){
+        getError("nosession", message, "session", []);
+        this.noError = false;
+    }
+    if(s.tournaments == null || s.tournaments == 0){
+        getError("notours", message, "session", [args])
+        this.noError = false;
     }
 
-    this.check = function(){
-        var noError = true;
-        if(!(this.args.length === this.requiredArgLength)){
-            getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
-            noError = false;
-        }
-        if(s == null){
-            getError("nosession", message, "session", []);
-            noError = false;
-        }
-        if(s.tournaments == null || s.tournaments == 0){
-            getError("notours", message, "session", [args])
-            noError = false;
-        }
-        return noError;
+    if(this.noError){
+        var teamsStr = "";
+        teams.forEach((t) => {
+            teamsStr.push(t.name);
+        })
+        this.message.channel.send(teamsStr);
     }
 }
 
@@ -333,27 +303,22 @@ const teamsAdd = function(message, args){
     this.message = message;
     this.args = args;
     this.teamName;
+    this.noError = true;
 
-    this.compute = function(){
-        if(this.check()){
-            teams.push(new Team(this.teamName));
+    if(!(this.args.length === this.requiredArgLength)){
+        getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
+        this.noError = false;
+    }
+    else{
+        this.teamName = args.shift();
+        if(knownTeam(this.teamName)){
+            getError("knownteam", message, "teams ls", [args])
+            this.noError = false;
         }
     }
 
-    this.check = function(){
-        var noError = true;
-        if(!(this.args.length === this.requiredArgLength)){
-            getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
-            noError = false;
-        }
-        else{
-            this.teamName = args.shift();
-            if(knownTeam(this.teamName)){
-                getError("knownteam", message, "teams ls", [args])
-                noError = false;
-            }
-        }
-        return noError;
+    if(this.noError){
+        teams.push(new Team(this.teamName));
     }
 }
 
@@ -366,19 +331,14 @@ const help = function(message, args){
     this.message = message;
     this.args = args;
     this.hasArgs = false;
+    this.noError = true;
 
-    this.compute = function(){
-        if(this.check()){
-            if(this.args == null || this.args.length === 0){
-                message.channel.send(SESSIONHELP + "\n" + TEAMHELP);
-            }
+    if(this.args != null && this.args.length > 0) this.hasArgs = true;
+
+    if(this.noError){
+        if(this.args == null || this.args.length === 0){
+            message.channel.send(SESSIONHELP + "\n" + TEAMHELP);
         }
-    }
-
-    this.check = function(){
-        var noError = true;
-        if(this.args != null && this.args.length > 0) this.hasArgs = true;
-        return noError;
     }
 }
 
@@ -425,7 +385,7 @@ function getError(type, message, command, args){
         break;
     }
     logger.log({
-        level: "error";
+        level: "error",
         message: logmsg
     })
     this.message.channel.send(botmsg);
