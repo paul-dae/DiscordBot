@@ -48,18 +48,18 @@ bot.on('message', (message) => {
             const command2 = args.shift().toLowerCase();
             switch(command2){
                 case "new":
-                    createSession(message).compute(false);
+                    createSession(message).compute();
                 break
                 case "tour":
                 case "tourney":
                 case "tournament":
-                    addTournament(message, args).compute(true);
+                    addTournament(message, args).compute();
                 break;
                 case "team":
-                    assignTeam(message, args).compute(true);
+                    assignTeam(message, args).compute();
                 break;
                 case "edit":
-                    editTournament(message, args).compute(true);
+                    editTournament(message, args).compute();
                 break;
             }
         break;
@@ -69,10 +69,10 @@ bot.on('message', (message) => {
             switch(command2){
                 case "ls":
                 case "list":
-                    teamsList(message).compute(false);
+                    teamsList(message).compute();
                 break;
                 case "add":
-                    teamsAdd(message, args).compute(true);
+                    teamsAdd(message, args).compute();
                 break;
             }
         break;
@@ -276,70 +276,108 @@ var createSession = function(message){
     this.args = new Array(0);
     this.message = message;
 
-    this.compute = function(checkArgs){
-        if(!checkArgs || this.args.length === this.requiredArgLength){
-            this.execute();
+    this.compute = function(){
+        if(this.check()){
+            s = new session(team(teams[0]));
         }
-        else getError("arglength", message, "s", [this.requiredArgLength, this.args.length]);
     }
 
-    this.execute = function(){
-        //TODO
+    this.check = function(){
+        var noError = true;
+        if(!(this.args.length === this.requiredArgLength)){
+            getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
+            noError = false;
+        }
+        if(s == null){
+            getError("nosession", message, "session", []);
+            noError = false;
+        }
+
+        return noError;
     }
 }
 
-//TODO: Check for Session != null
 var addTournament = function(message, args){
     this.requiredArgLength = 2;
     this.message = message;
     this.args = args;
 
-    this.compute = function(checkArgs){
-        if(!checkArgs || this.args.length === this.requiredArgLength){
-            this.execute();
+    this.compute = function(){
+        if(this.check()){
+            //TODO
         }
-        else getError("arglength", message, "s", [this.requiredArgLength, this.args.length]);
+    }
+
+    this.check = function(){
+        var noError = true;
+        if(!(this.args.length === this.requiredArgLength)){
+            getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
+            noError = false;
+        }
+        if(s == null){
+            getError("nosession", message, "session", []);
+            noError = false;
+        }
+
+        return noError;
     }
 }
 
-//TODO: Check for Session != null
 var assignTeam = function(message, args){
     this.reuiredArgLength = 1;
     this.message = message;
     this.args = args;
 
-    this.compute = function(checkArgs){
-        if(!checkArgs || this.args.length === this.requiredArgLength){
-            this.execute();
+    this.compute = function(){
+        if(this.check()){
+            s.team = new team(args[0]);
         }
-        else getError("arglength", message, "s", [this.requiredArgLength, this.args.length]);
     }
 
-    this.execute = function(){
-        if(teams.includes(arg)){
-            s.team = new team(arg);
+    this.check = function(){
+        var noError = true;
+        if(!(this.args.length === this.requiredArgLength)){
+            getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
+            noError = false;
         }
-        else{
+        if(s == null){
+            getError("nosession", message, "session", []);
+            noError = false;
+        }
+        if(!teams.includes(arg)){
             getError("unknownteam", message, "team", [args])
+            noError = false;
         }
+        return noError;
     }
 }
 
-//TODO: Check for Session != null, tours != null
 var editTournament = function(message, args){
     this.requiredArgLength = 3;
     this.message = message;
     this.args = args;
 
-    this.compute = function(checkArgs){
-        if(!checkArgs || this.args.length === this.requiredArgLength){
-            this.execute();
+    this.compute = function(){
+        if(this.check()){
+            //TODO
         }
-        else getError("arglength", message, "s", [this.requiredArgLength, this.args.length]);
     }
 
-    this.execute = function(){
-        //TODO
+    this.check = function(){
+        var noError = true;
+        if(!(this.args.length === this.requiredArgLength)){
+            getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
+            noError = false;
+        }
+        if(s == null){
+            getError("nosession", message, "session", []);
+            noError = false;
+        }
+        if(s.tournaments == null || s.tournaments == 0){
+            getError("notours", message, "session", [args])
+            noError = false;
+        }
+        return noError;
     }
 }
 
@@ -348,15 +386,27 @@ var teamsList = function(message){
     this.args = new Array(0);
     this.message = message;
 
-    this.compute = function(checkArgs){
-        if(!checkArgs || this.args.length === this.requiredArgLength){
-            this.execute();
+    this.compute = function(){
+        if(this.check()){
+            //TODO
         }
-        else getError("arglength", message, "s", [this.requiredArgLength, this.args.length]);
     }
 
-    this.execute = function(){
-        //TODO
+    this.check = function(){
+        var noError = true;
+        if(!(this.args.length === this.requiredArgLength)){
+            getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
+            noError = false;
+        }
+        if(s == null){
+            getError("nosession", message, "session", []);
+            noError = false;
+        }
+        if(s.tournaments == null || s.tournaments == 0){
+            getError("notours", message, "session", [args])
+            noError = false;
+        }
+        return noError;
     }
 }
 
@@ -365,15 +415,23 @@ var teamsAdd = function(){
     this.message = message;
     this.args = args;
 
-    this.compute = function(checkArgs){
-        if(!checkArgs || this.args.length === this.requiredArgLength){
-            this.execute();
+    this.compute = function(){
+        if(this.check()){
+            //TODO
         }
-        else getError("arglength", message, "s", [this.requiredArgLength, this.args.length]);
     }
 
-    this.execute = function(){
-        //TODO
+    this.check = function(){
+        var noError = true;
+        if(!(this.args.length === this.requiredArgLength)){
+            getError("arglength", message, "session", [this.requiredArgLength, this.args.length]);
+            noError = false;
+        }
+        if(teams.includes(arg)){
+            getError("knownteam", message, "teams ls", [args])
+            noError = false;
+        }
+        return noError;
     }
 }
 
@@ -381,12 +439,19 @@ var help = function(message, args){
     this.message = message;
     this.args = args;
 
-    this.compute = function(checkArgs){
-        this.execute()
+    this.compute = function(){
+        if(this.check()){
+            //TODO
+        }
     }
 
-    this.execute = function(){
-        //TODO
+    this.check = function(){
+        var noError = true;
+        if(teams.includes(arg)){
+            getError("knownteam", message, "teams ls", [args])
+            noError = false;
+        }
+        return noError;
     }
 }
 
@@ -400,7 +465,15 @@ function getError(type, message, command, args){
         break;
         case "unknownteam":
             logmsg = "Unknown Team: " + args[0] + "\nKnown Teams: " + teams;
-            botmsg = "Unknown Team. Try !" + command;
+            botmsg = "Unknown Team. Try !help " + command;
+        break;
+        case "nosession":
+            logmsg = "No Session created yet.";
+            botmsg = "Please try creating a new Session first! Try !help " + command;
+        break;
+        case "notours":
+            logmsg = "No tournaments found in session to edit.";
+            botmsg = "Please add tournaments to the session first Try !help " + command;
         break;
     }
     logger.log({

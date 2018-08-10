@@ -29,9 +29,9 @@ const BRACKET = toItalic("Bracket:") + " ";
 const OVERVIEW = toItalic("Overview:") + " ";
 const EVENT = toItalic("Eventpage:") + " ";
 
-function session(){
+function session(team){
     this.notes = "-";
-    this.team;
+    this.team = team;
     this.tournaments = new Array();
 
     this.addTournament = function(t, checkDuplicates = true){
