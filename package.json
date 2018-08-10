@@ -1,0 +1,11 @@
+{
+    "name": "TournamentFormatter-bot",
+    "version": "1.0.0",
+    "description": "Generates nice Text from a Battlefy Tournament page and an event Link :) .",
+    "main": "TournamentFormatterBot.js",
+    "author": "Worldcreator",
+    "dependencies": {
+        "discord.io": "https://github.com/woor/discord.io/tarball/gateway_v6",
+        "winston": "^3.0.0"
+    }
+}
