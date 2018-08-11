@@ -1,23 +1,23 @@
-var Discord = require('discord.js');
-var logger = require('winston');
-var auth = require('./auth.json');
-var session = require("./TournamentFormatter/session.js").session;
-var team = require("./TournamentFormatter/session.js").team;
-var tournament = require("./TournamentFormatter/session.js").tournament;
-var battlefyURL = require("./TournamentFormatter/session.js").battlefyURL;
-var config = require("./config.json");
+const Discord = require('discord.js');
+const logger = require('winston');
+const auth = require('./auth.json');
+const session = require("./TournamentFormatter/session.js").session;
+const team = require("./TournamentFormatter/session.js").team;
+const tournament = require("./TournamentFormatter/session.js").tournament;
+const battlefyURL = require("./TournamentFormatter/session.js").battlefyURL;
+const config = require("./config.json");
 
-var teams = new Array();
-var tour;
-var s;
-var awaiting;
+let teams = [];
+let tour;
+let s;
+let awaiting;
 const SESSIONHELP = "!session *arg*  Alias: !s *arg*\nargs:\n\t**new** : Create new Session\n\t**team** : Assign a team\n\t**tourney** args Alias: **tour** : Add a new Tournament";
-const SESSIONTOURHELP = "!s tour *Bracket URL* *Event URL*"
-const TEAMHELP = "!team *arg*\nargs:\n\t**ls** : Lists available Teams\n\t**add** *name* : Adds a new Team"
-const ABORT = "\nTo abort the process type abort"
+const SESSIONTOURHELP = "!s tour *Bracket URL* *Event URL*";
+const TEAMHELP = "!team *arg*\nargs:\n\t**ls** : Lists available Teams\n\t**add** *name* : Adds a new Team";
+const ABORT = "\nTo abort the process type abort";
 const ERRORLOG = [""];
 const ERRORMSG = [];
-const BOTCOMMANDER = "botcommander"
+const BOTCOMMANDER = "botcommander";
 
 // Configure logger settings
 logger.remove(logger.transports.Console);
@@ -38,7 +38,7 @@ bot.on('message', async message => {
     if(message.author.bot || !message.member.roles.find(role => role.name === BOTCOMMANDER) || message.content.indexOf(config.prefix) === 0) return;
     const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
-    var command2;
+    let command2;
 
     switch(command){
         case "s":
@@ -47,7 +47,7 @@ bot.on('message', async message => {
             switch(command2){
                 case "new":
                     createSession(message);
-                break
+                break;
                 case "tour":
                 case "tourney":
                 case "tournament":
@@ -105,7 +105,7 @@ const createSession = function(message){
         s = new session(teams[0]);
         getInfo("newsession", this.message, [s.team.name]);
     }
-}
+};
 
 /**
  * Adds a tournament to the session with the given bracket and event URLs.
@@ -140,7 +140,7 @@ const addTournament = function(message, args){
         s.addTournament(tour);
         getInfo("sTour", this.message, [tour.bracketURL.toString(), tour.eventURL]);
     }
-}
+};
 
 /**
  * Assigns the team with the passed teamname to the current session, if a
@@ -166,7 +166,7 @@ const assignTeam = function(message, args){
             this.noError = false;
         }
         if(knownTeam(this.teamname)){
-            getError("unknownteam", this.message, "team", [args])
+            getError("unknownteam", this.message, "team", [args]);
             this.noError = false;
         }
     }
@@ -175,7 +175,7 @@ const assignTeam = function(message, args){
         s.team = new team(this.teamName);
         getInfo("sTeam", this.message, [this.teamName]);
     }
-}
+};
 
 /**
  * Edit tournament with given indexOf
@@ -201,7 +201,7 @@ const editTournament = function(message, args){
         this.value = this.args.shift();
 
         if(s.tournaments.length < this.teamIndex){
-            getError("indexOutOfRange", this.message, "session post", [args])
+            getError("indexOutOfRange", this.message, "session post", [args]);
             this.noError = false;
         }
     }
@@ -210,7 +210,7 @@ const editTournament = function(message, args){
         this.noError = false;
     }
     else if(s.tournaments == null){
-        getError("notours", this.message, "session", [args])
+        getError("notours", this.message, "session", [args]);
         this.noError = false;
     }
 
@@ -226,12 +226,12 @@ const editTournament = function(message, args){
                 if(!s.tournaments[this.teamIndex].setStatus(this.value)) getError("status", this.message, status, [this.value]);
             break;
             default:
-                getError("editcmd", this.message, "session edit", [this.cmd])
+                getError("editcmd", this.message, "session edit", [this.cmd]);
             break;
         }
         getInfo("sEdit", this.message, [this.teamIndex, s.tournaments[this.teamIndex].bracketURL.toString(), s.tournaments[this.teamIndex].eventURL]);
     }
-}
+};
 
 
 /**
@@ -252,8 +252,8 @@ const post = function(message){
         getError("nosession", this.message, "session", []);
         this.noError = false;
     }
-    else if(s.tournaments == null || s.tournaments == 0){
-        getError("notours", this.message, "session", [args])
+    else if(s.tournaments == null || s.tournaments === 0){
+        getError("notours", this.message, "session", [args]);
         this.noError = false;
     }
 
@@ -261,7 +261,7 @@ const post = function(message){
         this.message.channel.send(s.toString());
         logger.info("Posting session");
     }
-}
+};
 
 /**
  * Lists all available teams
@@ -282,12 +282,12 @@ const teamsList = function(message){
         var teamsStr = "";
         teams.forEach((t) => {
             teamsStr += " , " + t.name;
-        })
+        });
         teamsStr = teamsStr.substring(3);
         this.message.channel.send("**[" + teamsStr + "]**");
         logger.info("Posting teams: " + teamsStr);
     }
-}
+};
 
 /**
  * Adds a team to teams
@@ -308,7 +308,7 @@ const teamsAdd = function(message, args){
     else{
         this.teamName = args.shift();
         if(knownTeam(this.teamName)){
-            getError("knownteam", this.message, "teams ls", [args])
+            getError("knownteam", this.message, "teams ls", [args]);
             this.noError = false;
         }
     }
@@ -317,7 +317,7 @@ const teamsAdd = function(message, args){
         teams.push(new team(this.teamName));
         getInfo("tAdd", this.message, [this.teamName]);
     }
-}
+};
 
 /**
  * Replies a help message [to the given command]
@@ -334,11 +334,12 @@ const help = function(message, args){
 
     if(this.noError){
         logger.info("Posting help");
-        if(this.args == null || this.args.length === 0){
+        if(!this.hasArgs){
             message.channel.send(SESSIONHELP + "\n" + TEAMHELP);
         }
+        //TODO else ;
     }
-}
+};
 
 /**
  * Logs an Error and gives the user feedback as well.
@@ -389,13 +390,13 @@ function getError(type, message, command, args){
     logger.log({
         level: "error",
         message: logmsg
-    })
+    });
     this.message.channel.send(botmsg);
 }
 
 function getInfo(type, message, args){
-    var logmsg = "Unidentified error: " + type;
-    var botmsg = "oof";
+    let logmsg = "Unidentified error: " + type;
+    let botmsg = "oof";
     switch(type){
         case "newsession":
             logmsg = "Created new Session, team: " + args[0];
@@ -423,16 +424,16 @@ function getInfo(type, message, args){
 }
 
 function getStringArray(objArr){
-    var strArr = [];
+    let strArr = [];
     objArr.forEach((o) => {
         strArr.push(o.toString());
-    })
+    });
     return strArr;
 }
 
 function knownTeam(teamName){
     teams.forEach((t) => {
         if(t.name.includes(teamName)) return true;
-    })
+    });
     return false;
 }
