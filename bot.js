@@ -223,7 +223,7 @@ const editTournament = function(message, args){
                 s.tournaments[this.teamIndex].event(this.value);
             break;
             case "status":
-                s.tournaments[this.teamIndex].setStatus(this.value);
+                if(!s.tournaments[this.teamIndex].setStatus(this.value)) getError("status", this.message, status, [this.value]);
             break;
             default:
                 getError("editcmd", this.message, "session edit", [this.cmd])
@@ -277,22 +277,14 @@ const teamsList = function(message){
         getError("arglength", this.message, "session", [this.requiredArgLength, this.args.length]);
         this.noError = false;
     }
-    if(s == null){
-        getError("nosession", this.message, "session", []);
-        this.noError = false;
-    }
-    if(s.tournaments == null || s.tournaments == 0){
-        getError("notours", this.message, "session", [args])
-        this.noError = false;
-    }
 
     if(this.noError){
         var teamsStr = "";
         teams.forEach((t) => {
-            teamsStr.push(", " + t.name);
+            teamsStr += " , " + t.name;
         })
-        teamStr = teamStr.substring(2);
-        this.message.channel.send(teamsStr);
+        teamsStr = teamsStr.substring(3);
+        this.message.channel.send("**[" + teamsStr + "]**");
         logger.info("Posting teams: " + teamsStr);
     }
 }
@@ -322,7 +314,7 @@ const teamsAdd = function(message, args){
     }
 
     if(this.noError){
-        teams.push(new Team(this.teamName));
+        teams.push(new team(this.teamName));
         getInfo("tAdd", this.message, [this.teamName]);
     }
 }
@@ -387,6 +379,10 @@ function getError(type, message, command, args){
             logmsg = "Unknown edit command: " + args[0];
             botmsg = "Unknown edit command : *" + args[0] + "*.  Try !help " + command;
         break;
+        case "status":
+            logmsg = "Unknown status: " + args[0];
+            botmsg = "Unknown status : *" + args[0] + "*.  Try !help " + command;
+        break;
         default:
         break;
     }
@@ -434,72 +430,9 @@ function getStringArray(objArr){
     return strArr;
 }
 
-
 function knownTeam(teamName){
     teams.forEach((t) => {
         if(t.name.includes(teamName)) return true;
     })
     return false;
 }
-
-
-
-
-
-
-
-
-
-//IDEA
-function transmission(userID, channelID){
-    this.userID = userID;
-    this.channelID = channelID;
-}
-
-function task(transmission, requiredState, execute, args){
-    this.transmission = transmission;
-    this.requiredState = requiredState;
-    this.execute = execute;
-    this.args = args;
-}
-
-function taskhandler(){
-    this.defaultState = "awaitingCmd";
-    this.availablesStates = ["awaitingCmd", "awaitingContext"];
-    this.state = this.defaultState;
-
-    this.abort = function(){
-        this.state = availablesStates[1];
-    }
-
-    this.compute = function(task){
-        if(this.state === this.availablesStates[task.requiredState]) this.state = this.availablesStates[task.execute(task.transmission, task.args)];
-        else{
-            var msg;
-            if(this.state = this.availablesStates[0]) msg = 0;
-            else if(this.state = this.availablesStates[1]) msg = 1;
-            bot.sendMessage({
-                to: channelID,
-                message: ERRORMSG[msg]
-            })
-            logger.log({
-                level: 'error',
-                message: ERRORLOG[msg]
-            });
-        }
-    }
-}
-
-// OLD
-// function waitInput(waitingCmd, userID, channelID, isActive = true){
-//     this.waitingCmd = waitingCmd;
-//     this.userID = userID;
-//     this.channelID = channelID;
-//     this.isActive = isActive;
-//     this.wrongInputs = 0;
-//     if(this.wrongInputs > 3) this.isActive = false;
-//
-//     this.done = function(){
-//         this.isActive = false;
-//     }
-// }
