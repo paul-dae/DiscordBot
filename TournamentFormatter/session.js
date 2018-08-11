@@ -5,24 +5,33 @@ const UNDERLINED = "__";
 const STRIKETHROUGH = "~~";
 const FRAME = "=========================================================================";
 const TEAMNAME = "__**Teamname:**__\n";
-const PLACEMENTS ={"Playing":":play_pause: _**Playing**_",
-    "First Place":":first_place::one:**. Place**",
-    "Second Place":":second_place::two:**. Place**",
-    "Third Place":":third_place::three:**. Place**",
-    "Fourth Place":":four:**. Place**",
-    "XPBoost":":regional_indicator_x::regional_indicator_p:  **Boost**",
-    "Canceled":":x:",
-    "Delayed":":construction: _**Delayed**_",
-    ":play_pause: _**Playing**_":"Playing",
-    ":first_place::one:**. Place**":"First Place",
-    ":second_place::two:**. Place**":"Second Place",
-    ":third_place::three:**. Place**":"Third Place",
-    ":four:**. Place**":"Fourth Place",
-    ":regional_indicator_x::regional_indicator_p:  **Boost**":"XPBoost",
-    ":x:":"Canceled" ,
-    ":construction: _**Delayed**_":"Delayed"
+const PLACEMENTS ={"playing":":play_pause: _**Playing**_",
+    "firstplace":":first_place::one:**. Place**",
+    "first":":first_place::one:**. Place**",
+    "1":":first_place::one:**. Place**",
+    "secondplace":":second_place::two:**. Place**",
+    "second":":second_place::two:**. Place**",
+    "2":":second_place::two:**. Place**",
+    "thirdplace":":third_place::three:**. Place**",
+    "third":":third_place::three:**. Place**",
+    "3":":third_place::three:**. Place**",
+    "fourthplace":":four:**. Place**",
+    "fourth":":four:**. Place**",
+    "4":":four:**. Place**",
+    "xpboost":":regional_indicator_x::regional_indicator_p:  **Boost**",
+    "boost":":regional_indicator_x::regional_indicator_p:  **Boost**",
+    "canceled":":x:",
+    "delayed":":construction: _**Delayed**_",
+    ":play_pause: _**Playing**_":"playing",
+    ":first_place::one:**. Place**":"firstplace",
+    ":second_place::two:**. Place**":"secondplace",
+    ":third_place::three:**. Place**":"thirdplace",
+    ":four:**. Place**":"fourthplace",
+    ":regional_indicator_x::regional_indicator_p:  **Boost**":"xpboost",
+    ":x:":"canceled" ,
+    ":construction: _**Delayed**_":"delayed"
 };
-const PLACEMENTKEYS = ["Playing" , "First Place", "Second Place", "Third Place", "Fourth Place", "XPBoost", "Canceled", "Delayed"];
+const PLACEMENTKEYS = ["playing", "firstplace", "first", "1", "secondplace", "second", "2", "thirdplace", "third", "3", "fourthplace", "fourth", "4", "xpboost", "boost", "canceled", "delayed"];
 const BATTLEFY_HOST = "battlefy.com";
 const EVENT_URL = "https://events.euw.leagueoflegends.com/events/";
 const BRACKET = toItalic("Bracket:") + " ";
@@ -85,8 +94,11 @@ function tournament(){
     }
 
     this.setStatus = function(statusStr){
-        if(PLACEMENTKEYS.contains(statusStr)) this.status = statusStr;
-        else throw "Can't compute status: " + statusStr;
+        if(PLACEMENTKEYS.includes(statusStr)){
+            this.status = statusStr;
+            return true
+        }
+        else return false;
     }
 
     this.toString = function(){
