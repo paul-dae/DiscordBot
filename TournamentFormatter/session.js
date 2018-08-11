@@ -1,4 +1,4 @@
-var url = require("url");
+const url = require("url");
 const ITALIC = "*";
 const BOLD = "**";
 const UNDERLINED = "__";
@@ -41,12 +41,12 @@ const EVENT = toItalic("Eventpage:") + " ";
 function session(team){
     this.notes = "-";
     this.team = team;
-    this.tournaments = new Array();
+    this.tournaments = [];
 
     this.addTournament = function(t, checkDuplicates = true){
         if(this.tournaments != null){
             if(checkDuplicates){
-                var duplicates = 1;
+                let duplicates = 1;
                 this.tournaments.forEach(function(tmnt){
                     if(tmnt.bracketURL.tName.includes(t.bracketURL.tName)) duplicates++;
                 });
@@ -54,13 +54,13 @@ function session(team){
             }
         }
         this.tournaments.push(t);
-    }
+    };
 
     this.toString = function(){
-        var out = FRAME + "\n";
+        let out = FRAME + "\n";
         this.tournaments.forEach(function(t){
             out += t.toString()
-        })
+        });
         out += TEAMNAME + this.team.name + "\n" + FRAME + "\n" + toBold("Notes: " + this.notes);
         return out;
     }
@@ -91,7 +91,7 @@ function tournament(){
             this.eventURL = str;
             this.eventID = this.eventURL.substr(this.eventURL.length - 6);
         }
-    }
+    };
 
     this.setStatus = function(statusStr){
         if(PLACEMENTKEYS.includes(statusStr)){
@@ -99,7 +99,7 @@ function tournament(){
             return true
         }
         else return false;
-    }
+    };
 
     this.toString = function(){
         return toUnderlined(toBold(this.bracketURL.tName)) + ": " + PLACEMENTS[this.status] + "\n" + BRACKET
@@ -109,7 +109,7 @@ function tournament(){
 
 function battlefyURL(sURL){
     this.url;
-    this.splitPath = new Array();
+    this.splitPath = [];
     this.tName;
     //try{
         this.url = url.parse(sURL, true);
@@ -151,7 +151,7 @@ function toStrikethrough(string){
 }
 
 Array.prototype.clean = function(deleteValue) {
-  for (var i = 0; i < this.length; i++) {
+  for (let i = 0; i < this.length; i++) {
     if (this[i] == deleteValue) {
       this.splice(i, 1);
       i--;
