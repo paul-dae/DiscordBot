@@ -32,6 +32,7 @@ bot.on('ready', function (evt) {
     logger.info('Connected');
     logger.info('Logged in as: ');
     logger.info(bot.username + ' - (' + bot.id + ')');
+    teams.push(new team("Everything is Okay"));
     teams.push(new team("lolgg"));
 });
 bot.on('message', async message => {
@@ -42,44 +43,13 @@ bot.on('message', async message => {
 
     switch(command){
         case "s":
-        case "session":
-            command2 = args.shift().toLowerCase();
-            switch(command2){
-                case "new":
-                    createSession(message);
-                break;
-                case "tour":
-                case "tourney":
-                case "tournament":
-                    addTournament(message, args);
-                break;
-                case "team":
-                    assignTeam(message, args);
-                break;
-                case "edit":
-                    editTournament(message, args);
-                break;
-                case "post":
-                    post(message);
-                break;
-            }
+        case "session": sessionf(command2);
         break;
         case "t":
-        case "teams":
-            command2 = args.shift().toLowerCase();
-            switch(command2){
-                case "ls":
-                case "list":
-                    teamsList(message);
-                break;
-                case "add":
-                    teamsAdd(message, args);
-                break;
-            }
+        case "teams": teamsf(command2);
         break;
         case "h":
-        case "help":
-            help(message, args);
+        case "help": help(message, args);
         break;
     }
 });
@@ -137,6 +107,7 @@ const addTournament = function(message, args){
         tour = new tournament();
         tour.bracketURL = new battlefyURL(this.bracketURL);
         tour.event(this.eventStr);
+        tour.setStatus("playing");
         s.addTournament(tour);
         getInfo("sTour", this.message, [tour.bracketURL.toString(), tour.eventURL]);
     }
@@ -223,7 +194,7 @@ const editTournament = function(message, args){
                 s.tournaments[this.teamIndex].event(this.value);
             break;
             case "status":
-                if(!s.tournaments[this.teamIndex].setStatus(this.value)) getError("status", this.message, status, [this.value]);
+                if(!s.tournaments[this.teamIndex].setStatus(this.value)) getError("status", this.message, "session", [this.value]);
             break;
             default:
                 getError("editcmd", this.message, "session edit", [this.cmd]);
@@ -301,17 +272,17 @@ const teamsAdd = function(message, args){
     this.teamName;
     this.noError = true;
 
-    if(!(this.args.length === this.requiredArgLength)){
-        getError("arglength", this.message, "session", [this.requiredArgLength, this.args.length]);
-        this.noError = false;
-    }
-    else{
-        this.teamName = args.shift();
+    // if(!(this.args.length === this.requiredArgLength)){
+    //     getError("arglength", this.message, "teams", [this.requiredArgLength, this.args.length]);
+    //     this.noError = false;
+    // }
+    //else{
+        this.teamName = args.join(" ");
         if(knownTeam(this.teamName)){
             getError("knownteam", this.message, "teams ls", [args]);
             this.noError = false;
         }
-    }
+    //}
 
     if(this.noError){
         teams.push(new team(this.teamName));
@@ -436,4 +407,40 @@ function knownTeam(teamName){
         if(t.name.includes(teamName)) return true;
     });
     return false;
+}
+
+function sessionf(command2) {
+    command2 = args.shift().toLowerCase();
+    switch(command2){
+        case "new":
+            createSession(message);
+            break;
+        case "tour":
+        case "tourney":
+        case "tournament":
+            addTournament(message, args);
+            break;
+        case "team":
+            assignTeam(message, args);
+            break;
+        case "edit":
+            editTournament(message, args);
+            break;
+        case "post":
+            post(message);
+            break;
+    }
+}
+
+function teamsf(command2) {
+    command2 = args.shift().toLowerCase();
+    switch(command2){
+        case "ls":
+        case "list":
+            teamsList(message);
+            break;
+        case "add":
+            teamsAdd(message, args);
+            break;
+    }
 }
