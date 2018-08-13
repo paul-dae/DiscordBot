@@ -390,6 +390,7 @@ function knownTeam(teamName){
     });
     return false;
 }
+<<<<<<< HEAD
 
 
 function sessionf(command2) {
@@ -427,3 +428,6 @@ function teamsf(command2) {
             break;
     }
 }
+=======
+//TODO uff
+>>>>>>> 3e4c7a0f9aee485c1fd89430a525b5e27e6c6aa1
