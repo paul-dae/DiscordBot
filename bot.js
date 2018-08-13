@@ -292,6 +292,7 @@ function help(message, args){
     let helpMsg = new chelp(message, args);
     //message.author.send(helpMsg.getMsg);
     logger.info("Send help I have crippling depression");
+    getInfo("help", message, "help", args)
 }
 
 /**
@@ -348,8 +349,8 @@ function getError(type, message, command, args){
 }
 
 function getInfo(type, message, args){
-    let logmsg = "Unidentified error: " + type;
-    let botmsg = "oof";
+    let logmsg = "" ;
+    let botmsg = "";
     switch(type){
         case "newsession":
             logmsg = "Created new Session, team: " + args[0];
@@ -371,9 +372,11 @@ function getInfo(type, message, args){
             logmsg = "Added new team: " + args[0];
             botmsg = "Added new team: " + args[0];
         break;
+        case "help":
+            logmsg = "Getting help.";
     }
-    logger.info(logmsg);
-    this.message.channel.send(botmsg);
+    if(logmsg !== "")logger.info(logmsg);
+    if(botmsg !== "")this.message.channel.send(botmsg);
 }
 
 function getStringArray(objArr){
