@@ -439,3 +439,4 @@ function knownTeam(teamName){
     });
     return false;
 }
+//TODO uff
