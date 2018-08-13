@@ -290,7 +290,7 @@ const teamsAdd = function(message, args){
 
 function help(message, args){
     let helpMsg = new chelp(message, args);
-    message.author.send(helpMsg.getMsg);
+    //message.author.send(helpMsg.getMsg);
     logger.info("Send help I have crippling depression");
 }
 

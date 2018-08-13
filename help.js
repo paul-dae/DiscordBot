@@ -13,28 +13,33 @@ const help = function(message, args){
 
     if(this.noError){
         if(!this.hasArgs){
-            switch (args) {
-                case s:
-                case session: message.author.send(SESSIONHELP);
+            //TODO
+        }
+        else{
+            switch (args[0]) {
+                case "s":
+                case "session":
+                    this.message.author.send(SESSIONHELP);
                     break;
-                case t:
-                case team: message.author.send(TEAMHELP);
+                case "t":
+                case "team":
+                    this.message.author.send(TEAMHELP);
                     break;
             }
         }
-        //TODO else ;
     }
 };
 
 const SESSIONHELP =
-    "!session | !s \n\t" +
+    "__**!session | !s**__ \n\t" +
     "**new** : Create new Session\n\t" +
     "**team** : Assign a team\n\t" +
     "**[tourney | tour] [battlefy link] [event link | event ID]** : Add a new Tournament";
-const TEAMHELP = "!team \n\t" +
+const TEAMHELP =
+    "__**!team **__\n\t" +
     "**ls** : Lists available Teams\n\t" +
     "" +
     "**add [name]** : Adds a new Team";
 const SESSIONTOURHELP = "!s tour *Bracket URL* *Event URL*";
 
-module.export = {help};
+module.exports = {help};
