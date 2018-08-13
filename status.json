@@ -1,0 +1,44 @@
+{
+  "status" : [
+    {
+      "name" : "Playing",
+      "aliases" : ["playing"],
+      "dscString" : ":play_pause: _**Playing**_"
+    },
+    {
+      "name" : "First Place",
+      "aliases" : ["first place", "firstplace", "first", "1"],
+      "dscString" : ":first_place::one:**. Place**"
+    },
+    {
+      "name" : "Second Place",
+      "aliases" : ["second place", "secondplace", "second", "2"],
+      "dscString" : ":second_place::two:**. Place**"
+    },
+    {
+      "name" : "Third Place",
+      "aliases" : ["third place", "thirdplace", "third", "3"],
+      "dscString" : ":third_place::three:**. Place**"
+    },
+    {
+      "name" : "Fourth Place",
+      "aliases" : ["fourth place", "fourthplace", "fourth", "4"],
+      "dscString" : ":four:**. Place**"
+    },
+    {
+      "name" : "XP Boost",
+      "aliases" : ["xp boost", "xpboost", "boost", "xp"],
+      "dscString" : ":regional_indicator_x::regional_indicator_p:  **Boost**"
+    },
+    {
+      "name" : "Canceled",
+      "aliases" : ["canceled", "cancled", "c"],
+      "dscString" : ":x:"
+    },
+    {
+      "name" : "Delayed",
+      "aliases" : ["delayed", "delay", "d"],
+      "dscString" : ":construction: _**Delayed**_"
+    }
+  ]
+}
