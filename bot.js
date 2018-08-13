@@ -6,14 +6,12 @@ const team = require("./TournamentFormatter/session.js").team;
 const tournament = require("./TournamentFormatter/session.js").tournament;
 const battlefyURL = require("./TournamentFormatter/session.js").battlefyURL;
 const config = require("./config.json");
+const chelp = require("./help.js").help;
 
 let teams = [];
 let tour;
 let s;
 let awaiting;
-const SESSIONHELP = "!session *arg*  Alias: !s *arg*\nargs:\n\t**new** : Create new Session\n\t**team** : Assign a team\n\t**tourney** args Alias: **tour** : Add a new Tournament";
-const SESSIONTOURHELP = "!s tour *Bracket URL* *Event URL*";
-const TEAMHELP = "!team *arg*\nargs:\n\t**ls** : Lists available Teams\n\t**add** *name* : Adds a new Team";
 const ABORT = "\nTo abort the process type abort";
 const ERRORLOG = [""];
 const ERRORMSG = [];
@@ -290,27 +288,11 @@ const teamsAdd = function(message, args){
     }
 };
 
-/**
- * Replies a help message [to the given command]
- * @param  {message} message the received message object
- * @param  {[string]} args  The Command(s)
- */
-const help = function(message, args){
-    this.message = message;
-    this.args = args;
-    this.hasArgs = false;
-    this.noError = true;
-
-    if(this.args != null && this.args.length > 0) this.hasArgs = true;
-
-    if(this.noError){
-        logger.info("Posting help");
-        if(!this.hasArgs){
-            message.channel.send(SESSIONHELP + "\n" + TEAMHELP);
-        }
-        //TODO else ;
-    }
-};
+function help(message, args){
+    let helpMsg = new chelp(message, args);
+    message.author.send(helpMsg.getMsg);
+    logger.info("Send help I have crippling depression");
+}
 
 /**
  * Logs an Error and gives the user feedback as well.
@@ -408,6 +390,7 @@ function knownTeam(teamName){
     });
     return false;
 }
+
 
 function sessionf(command2) {
     command2 = args.shift().toLowerCase();
