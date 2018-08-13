@@ -24,7 +24,7 @@ logger.add(new logger.transports.Console, {
 });
 logger.level = 'debug';
 // Initialize Discord Bot
-var bot = new Discord.Client();
+const bot = new Discord.Client();
 
 bot.on('ready', function (evt) {
     logger.info('Connected');
@@ -303,8 +303,8 @@ function help(message, args){
  * @param  {[string]} args    arguments, that are relevant to the error;
  */
 function getError(type, message, command, args){
-    var logmsg = "Unidentified error: " + type;
-    var botmsg = "oof";
+    let logmsg = "";
+    let botmsg = "";
     switch(type){
         case "arglength":
             logmsg = "Wrong argument Length\nGiven Args Length: " + args[0] + "\nRequired arglength" + args[1];
@@ -339,13 +339,15 @@ function getError(type, message, command, args){
             botmsg = "Unknown status : *" + args[0] + "*.  Try !help " + command;
         break;
         default:
+            logmsg = "Unidentified error: " + type;
+            botmsg = "oof";
         break;
     }
-    logger.log({
+    if(logmsg !== "")logger.log({
         level: "error",
         message: logmsg
     });
-    this.message.channel.send(botmsg);
+    if(botmsg !== "")this.message.channel.send(botmsg);
 }
 
 function getInfo(type, message, args){
