@@ -37,14 +37,12 @@ bot.on('message', async message => {
     if(message.author.bot || !message.member.roles.find(role => role.name === BOTCOMMANDER) || message.content.indexOf(config.prefix) === 0) return;
     const args = message.content.slice(config.prefix.length).trim().split(/ +/g);
     const command = args.shift().toLowerCase();
-    let command2;
-
     switch(command){
         case "s":
-        case "session": sessionf(command2);
+        case "session": sessionf(args);
         break;
         case "t":
-        case "teams": teamsf(command2);
+        case "teams": teamsf(args);
         break;
         case "h":
         case "help": help(message, args);
