@@ -30,8 +30,8 @@ bot.on('ready', function (evt) {
     logger.info('Connected');
     logger.info('Logged in as: ');
     logger.info(bot.username + ' - (' + bot.id + ')');
-    teams.push(new team("Everything is Okay"));
     teams.push(new team("lolgg"));
+    teams.push(new team("Everything is Okay"));
 });
 bot.on('message', async message => {
     if(message.author.bot || !message.member.roles.find(role => role.name === BOTCOMMANDER) || message.content.indexOf(config.prefix) === 0) return;
@@ -124,12 +124,12 @@ const assignTeam = function(message, args){
     this.teamName;
     this.noError = true;
 
-    if(!(this.args.length === this.requiredArgLength)){
-        getError("arglength", this.message, "session", [this.requiredArgLength, this.args.length]);
-        this.noError = false;
-    }
-    else{
-        this.teamName = args.shift();
+    // if(!(this.args.length === this.requiredArgLength)){
+    //     getError("arglength", this.message, "session", [this.requiredArgLength, this.args.length]);
+    //     this.noError = false;
+    // }
+    // else{
+        this.teamName = args.join(" ");
         if(s == null){
             getError("nosession", this.message, "session", []);
             this.noError = false;
@@ -138,7 +138,7 @@ const assignTeam = function(message, args){
             getError("unknownteam", this.message, "team", [args]);
             this.noError = false;
         }
-    }
+    //}
 
     if(this.noError){
         s.team = new team(this.teamName);
@@ -396,8 +396,8 @@ function knownTeam(teamName){
     return false;
 }
 
-function sessionf(command2) {
-    command2 = args.shift().toLowerCase();
+function sessionf(args) {
+    let command2 = args.shift().toLowerCase();
     switch(command2){
         case "new":
             createSession(message);
@@ -419,8 +419,8 @@ function sessionf(command2) {
     }
 }
 
-function teamsf(command2) {
-    command2 = args.shift().toLowerCase();
+function teamsf(args) {
+    let command2 = args.shift().toLowerCase();
     switch(command2){
         case "ls":
         case "list":
