@@ -39,10 +39,10 @@ bot.on('message', async message => {
     const command = args.shift().toLowerCase();
     switch(command){
         case "s":
-        case "session": sessionf(args);
+        case "session": sessionf(message, args);
         break;
         case "t":
-        case "teams": teamsf(args);
+        case "teams": teamsf(message, args);
         break;
         case "h":
         case "help": help(message, args);
@@ -394,7 +394,7 @@ function knownTeam(teamName){
     return false;
 }
 
-function sessionf(args) {
+function sessionf(message, args) {
     let command2 = args.shift().toLowerCase();
     switch(command2){
         case "new":
@@ -417,7 +417,7 @@ function sessionf(args) {
     }
 }
 
-function teamsf(args) {
+function teamsf(message, args) {
     let command2 = args.shift().toLowerCase();
     switch(command2){
         case "ls":
