@@ -55,7 +55,12 @@ function session(team){
             }
         }
         this.tournaments.push(t);
+        t.number = this.tournaments.length;
     };
+
+    this.removeTournament = function(index){
+        this.tournaments.splice(index, 1);
+    }
 
     this.toString = function(){
         let out = FRAME + "\n";
@@ -82,6 +87,7 @@ function tournament(){
     this.eventID;
     this.status = "Playing";
     this.tName;
+    this.number;
 
     this.event = function(str){
         if(str.length == 6) {
@@ -103,7 +109,7 @@ function tournament(){
     };
 
     this.toString = function(){
-        return toUnderlined(toBold(this.bracketURL.tName)) + ": " + PLACEMENTS[this.status] + "\n" + BRACKET
+        return toUnderlined(toBold("[" + this.number + "]" + this.bracketURL.tName)) + ": " + PLACEMENTS[this.status] + "\n" + BRACKET
                 + "<" + this.bracketURL.toString() + ">" + "\n" + EVENT + "<" + this.eventURL + ">\n\n";
     }
 }
