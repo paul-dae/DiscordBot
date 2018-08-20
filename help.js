@@ -40,6 +40,5 @@ const TEAMHELP =
     "**ls** : Lists available Teams\n\t" +
     "" +
     "**add [name]** : Adds a new Team";
-const SESSIONTOURHELP = "!s tour *Bracket URL* *Event URL*";
 
 module.exports = {help};

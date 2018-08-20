@@ -60,7 +60,7 @@ function session(team){
 
     this.removeTournament = function(index){
         this.tournaments.splice(index, 1);
-    }
+    };
 
     this.toString = function(){
         let out = FRAME + "\n";
