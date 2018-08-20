@@ -109,7 +109,7 @@ function tournament(){
     };
 
     this.toString = function(){
-        return toUnderlined(toBold("[" + this.number + "]" + this.bracketURL.tName)) + ": " + PLACEMENTS[this.status] + "\n" + BRACKET
+        return toUnderlined(toBold("[" + this.number + "] " + this.bracketURL.tName)) + ": " + PLACEMENTS[this.status] + "\n" + BRACKET
                 + "<" + this.bracketURL.toString() + ">" + "\n" + EVENT + "<" + this.eventURL + ">\n\n";
     }
 }
